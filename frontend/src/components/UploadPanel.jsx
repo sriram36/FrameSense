@@ -1,9 +1,19 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+const PIPELINE_LOGS = [
+  "Uploading image data...",
+  "Extracting image features (sharpness, contrast, noise)...",
+  "Running RandomForest degradation classifier...",
+  "Computing PCA reconstruction error for anomalies...",
+  "Generating defect localization heatmap...",
+  "Finalizing quality score...",
+];
 
 export default function UploadPanel({ onAnalyze, loading }) {
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [logIndex, setLogIndex] = useState(0);
   const inputRef = useRef(null);
 
   const selectFile = useCallback((selected) => {
@@ -19,6 +29,17 @@ export default function UploadPanel({ onAnalyze, loading }) {
     selectFile(dropped);
   };
 
+  useEffect(() => {
+    if (!loading) {
+      setLogIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setLogIndex((prev) => Math.min(prev + 1, PIPELINE_LOGS.length - 1));
+    }, 600); // Progress through logs every 600ms
+    return () => clearInterval(interval);
+  }, [loading]);
+
   return (
     <div className="upload-panel">
       <div
@@ -26,10 +47,10 @@ export default function UploadPanel({ onAnalyze, loading }) {
         onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
         onDragLeave={() => setDragActive(false)}
         onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
+        onClick={() => !loading && inputRef.current?.click()}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") inputRef.current?.click(); }}
+        onKeyDown={(e) => { if (!loading && (e.key === "Enter" || e.key === " ")) inputRef.current?.click(); }}
       >
         {previewUrl ? (
           <img src={previewUrl} alt="Selected upload preview" className="dropzone-preview" />
@@ -47,6 +68,19 @@ export default function UploadPanel({ onAnalyze, loading }) {
           onChange={(e) => selectFile(e.target.files?.[0])}
         />
       </div>
+
+      {loading && (
+        <div className="analysis-logs">
+          <div className="log-spinner"></div>
+          <div className="log-text">
+            {PIPELINE_LOGS.slice(0, logIndex + 1).map((log, i) => (
+              <div key={i} className={`log-line ${i === logIndex ? "log-active" : "log-muted"}`}>
+                <span className="log-prefix">&gt;</span> {log}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="upload-actions">
         <button
