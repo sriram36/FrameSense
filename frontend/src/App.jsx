@@ -9,6 +9,7 @@ export default function App() {
 
   const [result, setResult] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [heatmapUrl, setHeatmapUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -22,9 +23,11 @@ export default function App() {
     setError(null);
     setResult(null);
     setPreviewUrl(URL.createObjectURL(file));
+    setHeatmapUrl(null);
     try {
       const data = await analyzeImage(file);
       setResult(data);
+      if (data.heatmap_url) setHeatmapUrl(BASE + data.heatmap_url);
       setHistoryStale(true);
     } catch (err) {
       setError(err.message);
@@ -58,6 +61,7 @@ export default function App() {
       const data = await getResult(id);
       setResult(data);
       setPreviewUrl(data.image_url ? BASE + data.image_url : null);
+      setHeatmapUrl(data.heatmap_url ? BASE + data.heatmap_url : null);
       setTab("upload");
     } catch (err) {
       setError(err.message);
@@ -85,7 +89,7 @@ export default function App() {
           <>
             <UploadPanel onAnalyze={runAnalysis} loading={loading} />
             {error && <p className="error-text">Analysis failed: {error}</p>}
-            {result && <ResultCard result={result} imageUrl={previewUrl} />}
+            {result && <ResultCard result={result} imageUrl={previewUrl} heatmapUrl={heatmapUrl} />}
           </>
         )}
 

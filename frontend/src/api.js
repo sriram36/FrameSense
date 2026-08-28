@@ -1,4 +1,7 @@
-export const BASE = import.meta.env.VITE_API_URL || "https://framesense-pvpi.onrender.com";
+// In Docker: nginx proxies /api → backend (VITE_API_URL is empty, prefix=/api).
+// On Vercel: VITE_API_URL points directly to the Render backend (no prefix needed).
+export const BASE = import.meta.env.VITE_API_URL || "";
+const API = BASE ? BASE : "/api";
 
 async function handle(res) {
   if (!res.ok) {
@@ -17,21 +20,21 @@ async function handle(res) {
 export async function analyzeImage(file) {
   const formData = new FormData();
   formData.append("file", file);
-  const res = await fetch(`${BASE}/analyze`, { method: "POST", body: formData });
+  const res = await fetch(`${API}/analyze`, { method: "POST", body: formData });
   return handle(res);
 }
 
 export async function getResult(id) {
-  const res = await fetch(`${BASE}/results/${id}`);
+  const res = await fetch(`${API}/results/${id}`);
   return handle(res);
 }
 
 export async function listResults(limit = 20, offset = 0) {
-  const res = await fetch(`${BASE}/results?limit=${limit}&offset=${offset}`);
+  const res = await fetch(`${API}/results?limit=${limit}&offset=${offset}`);
   return handle(res);
 }
 
 export async function getHealth() {
-  const res = await fetch(`${BASE}/health`);
+  const res = await fetch(`${API}/health`);
   return handle(res);
 }

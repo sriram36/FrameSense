@@ -36,6 +36,8 @@ def on_startup():
 def serialize(record: Analysis) -> AnalysisResult:
     result = AnalysisResult.model_validate(record)
     result.image_url = f"/uploads/{os.path.basename(record.image_path)}"
+    if record.heatmap_path:
+        result.heatmap_url = f"/results/{record.id}/heatmap"
     return result
 
 
@@ -67,17 +69,30 @@ async def analyze(file: UploadFile = File(...), db: Session = Depends(get_db)):
         raise HTTPException(status_code=503, detail="model not loaded -- run train_classifier.py first")
 
     result = pipeline.analyze(bgr)
+    error_map = result.pop("error_map", None)
 
     record_id = uuid.uuid4().hex
     ext = os.path.splitext(file.filename or "upload.jpg")[1] or ".jpg"
     image_path = os.path.join(UPLOAD_DIR, f"{record_id}{ext}")
+    heatmap_path = None
+
     with open(image_path, "wb") as f:
         f.write(raw)
+
+    if error_map is not None:
+        try:
+            from .ml.pca_anomaly import error_map_to_heatmap
+            heatmap_bgr = error_map_to_heatmap(error_map, bgr)
+            heatmap_path = os.path.join(UPLOAD_DIR, f"{record_id}_heatmap{ext}")
+            cv2.imwrite(heatmap_path, heatmap_bgr)
+        except Exception as e:
+            print(f"Failed to generate heatmap: {e}")
 
     record = Analysis(
         id=record_id,
         filename=file.filename or "upload",
         image_path=image_path,
+        heatmap_path=heatmap_path,
         quality_score=result["quality_score"],
         quality_label=result["quality_label"],
         issues=result["issues"],
@@ -90,6 +105,13 @@ async def analyze(file: UploadFile = File(...), db: Session = Depends(get_db)):
 
     return serialize(record)
 
+@app.get("/results/{result_id}/heatmap")
+def get_heatmap(result_id: str, db: Session = Depends(get_db)):
+    from fastapi.responses import FileResponse
+    record = db.get(Analysis, result_id)
+    if record is None or not record.heatmap_path:
+        raise HTTPException(status_code=404, detail="heatmap not found")
+    return FileResponse(record.heatmap_path)
 
 @app.get("/results/{result_id}", response_model=AnalysisResult)
 def get_result(result_id: str, db: Session = Depends(get_db)):

@@ -11,15 +11,26 @@ const FEATURE_LABELS = {
   edge_density: "Edge density",
 };
 
-export default function ResultCard({ result, imageUrl }) {
+export default function ResultCard({ result, imageUrl, heatmapUrl }) {
   const features = Object.entries(result.features || {});
 
   return (
     <div className="result-card">
       <div className="result-top">
-        {imageUrl && (
-          <img src={imageUrl} alt={result.filename} className="result-image" />
-        )}
+        <div className="image-comparison">
+          {imageUrl && (
+            <div className="image-container">
+              <span className="image-label">Original</span>
+              <img src={imageUrl} alt={result.filename} className="result-image" />
+            </div>
+          )}
+          {heatmapUrl && (
+            <div className="image-container">
+              <span className="image-label">Defect Heatmap</span>
+              <img src={heatmapUrl} alt="Anomaly Heatmap" className="result-image" />
+            </div>
+          )}
+        </div>
         <ScoreGauge score={result.quality_score} label={result.quality_label} />
       </div>
 

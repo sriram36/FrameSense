@@ -82,18 +82,18 @@ class QualityPipeline:
         issue_type, severity = label.rsplit("_", 1)
         return [{"type": issue_type, "severity": severity, "confidence": round(confidence, 3)}]
 
-    def _anomaly_score(self, bgr: np.ndarray) -> tuple[float | None, bool]:
+    def _anomaly_score(self, bgr: np.ndarray) -> tuple[float | None, bool, np.ndarray | None]:
         if self.autoencoder is not None:
             from .autoencoder import reconstruction_error
 
-            score, _error_map = reconstruction_error(self.autoencoder, bgr)
-            return score, score > self.ae_threshold
+            score, error_map = reconstruction_error(self.autoencoder, bgr)
+            return score, score > self.ae_threshold, error_map
 
         if self.pca_detector is not None:
-            is_defect, score = self.pca_detector.is_defective(bgr)
-            return score, is_defect
+            score, error_map = self.pca_detector.reconstruction_error(bgr)
+            return score, (self.pca_detector.threshold is not None and score > self.pca_detector.threshold), error_map
 
-        return None, False
+        return None, False, None
 
     def analyze(self, bgr: np.ndarray) -> dict:
         feats = {}
@@ -102,7 +102,7 @@ class QualityPipeline:
         feats = extract_features(bgr)
 
         issues = self._classify(bgr, feats) if self.classifier_bundle else []
-        anomaly_score, is_defect = self._anomaly_score(bgr)
+        anomaly_score, is_defect, error_map = self._anomaly_score(bgr)
 
         score = 100
         for issue in issues:
@@ -125,6 +125,7 @@ class QualityPipeline:
             "issues": issues,
             "features": {k: round(v, 4) for k, v in feats.items()},
             "anomaly_score": anomaly_score,
+            "error_map": error_map,
         }
 
 

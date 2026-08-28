@@ -131,13 +131,15 @@ curl -F "file=@samples/blurry.jpg" http://localhost:8000/analyze
   "quality_label": "ACCEPTABLE",
   "issues": [{"type": "blur", "severity": "medium", "confidence": 0.65}],
   "features": {"sharpness": 12.3, "brightness": 0.49, "contrast": 0.11, "noise_estimate": 0.02, "saturation": 0.31, "blockiness": 1.4, "edge_density": 0.08},
-  "anomaly_score": null,
+  "anomaly_score": 0.05,
   "image_url": "/uploads/a1b2c3....jpg",
+  "heatmap_url": "/results/a1b2c3.../heatmap",
   "created_at": "2026-08-28T10:00:00Z"
 }
 ```
 
 **`GET /results/{id}`** -- fetch one stored analysis.
+**`GET /results/{id}/heatmap`** -- fetch the anomaly heatmap image (explainability bonus).
 **`GET /results?limit=20&offset=0`** -- paginated history.
 **`GET /health`** -- `{"status": "ok", "model_loaded": true, "db": "ok"}`.
 
@@ -197,6 +199,11 @@ regardless of where it's deployed.
 
 ## Deployment
 
-Local Docker Compose is sufficient per the assessment brief. If you deploy
-this online, note the URL here. Otherwise: **local-only deployment via
-`docker compose up`, as permitted by the brief.**
+**Local (Assessment Preferred):**
+Local Docker Compose is sufficient and strongly preferred per the assessment brief.
+Run `docker compose up --build` and access via http://localhost:8080.
+
+**Live Deployment (Bonus):**
+The app is also deployed live for demonstration:
+- Frontend (Vercel): https://framesense.vercel.app/
+- Backend (Render): https://framesense-pvpi.onrender.com/

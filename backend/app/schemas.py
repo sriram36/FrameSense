@@ -18,6 +18,7 @@ class AnalysisResult(BaseModel):
     features: dict[str, float]
     anomaly_score: float | None = None
     image_url: str | None = None
+    heatmap_url: str | None = None
     created_at: datetime
 
     class Config:

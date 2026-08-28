@@ -233,6 +233,28 @@ body {
   flex-wrap: wrap;
 }
 
+.image-comparison {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.image-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.image-label {
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .result-image {
   width: 180px;
   height: 180px;
