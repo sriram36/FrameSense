@@ -1,5 +1,12 @@
 {
-  "env": {
-    "VITE_API_URL": "https://framesense-pvpi.onrender.com"
-  }
+  "rewrites": [
+    {
+      "source": "/api/:match*",
+      "destination": "https://framesense-pvpi.onrender.com/:match*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

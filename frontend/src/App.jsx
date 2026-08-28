@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BASE, analyzeImage, getResult, listResults } from "./api.js";
+import { API, analyzeImage, getResult, listResults } from "./api.js";
 import HistoryList from "./components/HistoryList.jsx";
 import ResultCard from "./components/ResultCard.jsx";
 import UploadPanel from "./components/UploadPanel.jsx";
@@ -27,7 +27,7 @@ export default function App() {
     try {
       const data = await analyzeImage(file);
       setResult(data);
-      if (data.heatmap_url) setHeatmapUrl(BASE + data.heatmap_url);
+      if (data.heatmap_url) setHeatmapUrl(API + data.heatmap_url);
       setHistoryStale(true);
     } catch (err) {
       setError(err.message);
@@ -60,8 +60,8 @@ export default function App() {
     try {
       const data = await getResult(id);
       setResult(data);
-      setPreviewUrl(data.image_url ? BASE + data.image_url : null);
-      setHeatmapUrl(data.heatmap_url ? BASE + data.heatmap_url : null);
+      setPreviewUrl(data.image_url ? API + data.image_url : null);
+      setHeatmapUrl(data.heatmap_url ? API + data.heatmap_url : null);
       setTab("upload");
     } catch (err) {
       setError(err.message);

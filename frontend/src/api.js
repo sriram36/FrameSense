@@ -1,7 +1,6 @@
 // In Docker: nginx proxies /api → backend (VITE_API_URL is empty, prefix=/api).
-// On Vercel: VITE_API_URL points directly to the Render backend (no prefix needed).
-export const BASE = import.meta.env.VITE_API_URL || "";
-const API = BASE ? BASE : "/api";
+// On Vercel: vercel.json rewrites /api → Render backend (prefix=/api).
+export const API = import.meta.env.VITE_API_URL || "/api";
 
 async function handle(res) {
   if (!res.ok) {
