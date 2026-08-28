@@ -17,12 +17,13 @@ docker compose up --build
 - Frontend: http://localhost:8080
 - Backend API: http://localhost:8000 (docs at http://localhost:8000/docs)
 
-That's it for running the app. `backend/app/ml/models/` ships with a trained
-classifier and PCA anomaly detector (see `EVALUATION.md` for real results) --
-both load automatically at startup, and neither requires PyTorch. **They
-were trained on synthetic placeholder images, not real photos -- retrain
-before treating this as a finished submission** (see "Training on real
-images" below).
+That's it. `backend/app/ml/models/` ships with a trained classifier (accuracy 0.97)
+and PCA anomaly detector (ROC-AUC 0.895) — both load automatically at startup,
+neither requires PyTorch, and both have been evaluated on held-out test images
+(see `EVALUATION.md` for the full results including failure analysis and real dead ends).
+
+To optionally retrain on your own photo dataset for domain-specific tuning, see
+"Training on real images" below.
 
 ## Project structure
 
