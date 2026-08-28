@@ -36,7 +36,7 @@ export default function UploadPanel({ onAnalyze, loading }) {
     }
     const interval = setInterval(() => {
       setLogIndex((prev) => Math.min(prev + 1, PIPELINE_LOGS.length - 1));
-    }, 600); // Progress through logs every 600ms
+    }, 2000); // Progress through logs every 2 seconds
     return () => clearInterval(interval);
   }, [loading]);
 
