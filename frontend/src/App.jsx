@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { analyzeImage, getResult, listResults } from "./api.js";
+import { BASE, analyzeImage, getResult, listResults } from "./api.js";
 import HistoryList from "./components/HistoryList.jsx";
 import ResultCard from "./components/ResultCard.jsx";
 import UploadPanel from "./components/UploadPanel.jsx";
@@ -57,7 +57,7 @@ export default function App() {
     try {
       const data = await getResult(id);
       setResult(data);
-      setPreviewUrl(data.image_url || null);
+      setPreviewUrl(data.image_url ? BASE + data.image_url : null);
       setTab("upload");
     } catch (err) {
       setError(err.message);

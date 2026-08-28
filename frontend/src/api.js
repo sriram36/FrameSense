@@ -1,4 +1,4 @@
-const BASE = "/api";
+export const BASE = import.meta.env.VITE_API_URL || "https://framesense-pvpi.onrender.com";
 
 async function handle(res) {
   if (!res.ok) {
