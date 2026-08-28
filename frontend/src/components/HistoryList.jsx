@@ -1,3 +1,5 @@
+import { API } from "../api.js";
+
 const LABEL_COLOR = {
   ACCEPTABLE: "#0F6E56",
   DEGRADED: "#BA7517",
@@ -13,6 +15,9 @@ export default function HistoryList({ items, onSelect, loading, error }) {
     <div className="history-list">
       {items.map((item) => (
         <button key={item.id} className="history-row" onClick={() => onSelect(item.id)}>
+          <div className="history-thumb-wrapper">
+            <img src={API + item.image_url} alt="" className="history-thumb" />
+          </div>
           <span className="history-filename">{item.filename}</span>
           <span className="history-score" style={{ color: LABEL_COLOR[item.quality_label] }}>
             {item.quality_score}
