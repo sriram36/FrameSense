@@ -14,7 +14,7 @@ jobs:
         run: |
           # Replace the URL below with your actual Render backend URL once deployed.
           # For example: https://framesense-backend.onrender.com/health
-          BACKEND_URL="https://YOUR_RENDER_APP_URL.onrender.com/health"
+          BACKEND_URL="https://framesense-pvpi.onrender.com/health"
           
           echo "Pinging $BACKEND_URL to keep it awake..."
           
