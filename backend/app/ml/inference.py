@@ -36,34 +36,31 @@ class QualityPipeline:
         else:
             print(f"WARNING: no classifier found at {clf_path} -- run train_classifier.py first")
 
+        # Default to PCA anomaly detector as it outperforms the PyTorch Autoencoder 
+        # on noise and corruption detection (ROC-AUC 0.895 vs 0.785).
+        pca_path = os.path.join(models_dir, "pca_anomaly.joblib")
+        if os.path.exists(pca_path):
+            from .pca_anomaly import PCAAnomalyDetector
+            self.pca_detector = PCAAnomalyDetector.load(pca_path)
+            print(f"loaded PCA anomaly detector (default, ROC-AUC={self.pca_detector.roc_auc:.3f})")
+        else:
+            print(f"WARNING: no PCA anomaly detector found at {pca_path}")
+
+        # Optional Autoencoder (kept for experimental purposes, but not used as primary)
         ae_path = os.path.join(models_dir, "autoencoder.pt")
-        if os.path.exists(ae_path):
+        if os.path.exists(ae_path) and self.pca_detector is None:
             try:
                 import torch
-
                 from .autoencoder import ConvAutoencoder
-
-                checkpoint = torch.load(ae_path, map_location="cpu")
+                checkpoint = torch.load(ae_path, map_location="cpu", weights_only=True)
                 model = ConvAutoencoder()
                 model.load_state_dict(checkpoint["state_dict"])
                 model.eval()
                 self.autoencoder = model
                 self.ae_threshold = checkpoint["threshold"]
+                print(f"loaded Autoencoder fallback (ROC-AUC={checkpoint.get('roc_auc', 0):.3f})")
             except ImportError:
-                print("WARNING: torch not installed -- will try the PCA anomaly detector fallback")
-        else:
-            print(f"WARNING: no autoencoder found at {ae_path} -- run train_autoencoder.py, or rely on the PCA fallback")
-
-        # Fallback anomaly detector: no torch dependency, so defect detection
-        # still works even without the conv autoencoder. See
-        # app/ml/pca_anomaly.py and train/train_pca_anomaly.py.
-        if self.autoencoder is None:
-            pca_path = os.path.join(models_dir, "pca_anomaly.joblib")
-            if os.path.exists(pca_path):
-                from .pca_anomaly import PCAAnomalyDetector
-
-                self.pca_detector = PCAAnomalyDetector.load(pca_path)
-                print(f"loaded PCA anomaly detector fallback (ROC-AUC={self.pca_detector.roc_auc:.3f})")
+                print("WARNING: torch not installed -- anomaly detection disabled")
             else:
                 print(f"WARNING: no anomaly detector available at all (checked {ae_path} and {pca_path}) "
                       "-- defect detection disabled, run train_autoencoder.py or train_pca_anomaly.py")

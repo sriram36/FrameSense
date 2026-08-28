@@ -14,18 +14,22 @@ import os
 os.environ["DATABASE_URL"] = "sqlite:///./data/test_analyses.db"
 
 import pytest
+import cv2
+import numpy as np
 from fastapi.testclient import TestClient
-from PIL import Image
 
 from app.main import app
+from app.db.models import init_db
 
+init_db()
 client = TestClient(app)
 
 
 def _fake_jpeg_bytes(size=(64, 64), color=(120, 130, 110)) -> bytes:
-    buf = io.BytesIO()
-    Image.new("RGB", size, color).save(buf, format="JPEG")
-    return buf.getvalue()
+    img = np.zeros((size[1], size[0], 3), dtype=np.uint8)
+    img[:] = (color[2], color[1], color[0])
+    _, buf = cv2.imencode(".jpg", img)
+    return buf.tobytes()
 
 
 def test_health():

@@ -100,11 +100,11 @@ pip install torch  # if not already installed
 python train/train_autoencoder.py --images-dir /path/to/your/clean/images
 ```
 
-`app/ml/inference.py` prefers the autoencoder if `autoencoder.pt` exists,
-and falls back to the PCA detector otherwise -- so the app has working
-defect detection either way. See `EVALUATION.md` for why the PCA detector's
-"defect" definition is scoped to noise/corruption rather than all
-degradation types (a real diagnostic finding, not an arbitrary choice).
+`app/ml/inference.py` defaults to the PCA detector (ROC-AUC 0.895) because 
+evaluation showed that the higher-capacity PyTorch autoencoder (ROC-AUC 0.785)
+is *too good* at reconstructing corrupted blocks and noise, causing it to miss 
+actual defects. See `EVALUATION.md` for the full breakdown of reconstruction 
+error asymmetry.
 
 All three scripts print real evaluation output (classification report,
 confusion matrix, ROC-AUC) to the console -- copy results into

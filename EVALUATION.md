@@ -138,13 +138,31 @@ image-wide elevated error instead of localized hotspots -- both are the
 mechanistically correct visual signature for each defect type.
 
 **PyTorch conv-autoencoder** (`app/ml/autoencoder.py`,
-`train/train_autoencoder.py`) remains implemented as a higher-capacity
-upgrade path but **not executed** in this sandbox (no `torch`, no network to
-install it). The API uses the PCA detector as an automatic fallback
-(`app/ml/inference.py`), so defect detection works today either way. Worth
-checking once you have torch locally: does a nonlinear model handle the
-underexposure/blur asymmetry more gracefully than PCA's strictly linear
-reconstruction, or does the same asymmetry persist?
+`train/train_autoencoder.py`) was executed and evaluated against the same
+baseline. 
+- **ROC-AUC: 0.785** (Threshold: 0.03349, TPR: 0.65, FPR: 0.10)
+
+**Autoencoder Asymmetry (Reconstruction error vs clean baseline):**
+
+| Degradation | low | medium | high |
+|---|---|---|---|
+| blur | 0.97x | 0.88x | 0.79x |
+| overexposure | 1.13x | 2.03x | 3.05x |
+| underexposure | 2.35x | 4.39x | 7.32x |
+| noise | 1.02x | 1.09x | 1.29x |
+| corruption | 0.99x | 0.99x | 1.00x |
+
+**Finding:** The Autoencoder performs *worse* as a defect detector for noise
+and corruption. Because of its higher representational capacity, the CNN 
+learns to effectively reconstruct random corruption blocks (1.00x error ratio) 
+and handles noise much better than PCA (1.29x vs 1.93x). Meanwhile, the
+underexposure asymmetry persists and is even more extreme (up to 7.32x error). 
+Because it fails to produce an anomalous reconstruction error for corruption, 
+its overall ROC-AUC on the `{underexposure, noise, corruption}` scope is only 0.785.
+
+**Decision:** The strictly linear, lower-capacity PCA detector (ROC-AUC 0.895) 
+remains the default. The PyTorch autoencoder is kept in the codebase for 
+experimental purposes but is no longer the primary anomaly detector.
 
 ## Score/label calibration (a real product-decision fix, not just an ML one)
 
