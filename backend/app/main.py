@@ -16,7 +16,8 @@ app = FastAPI(title="Image Quality & Defect Detector")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.environ.get("CORS_ORIGIN", "http://localhost:5173")],
+    allow_origins=["*"], # Allow all origins (localhost and Vercel)
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
