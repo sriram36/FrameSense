@@ -44,8 +44,9 @@ def serialize(record: Analysis) -> AnalysisResult:
 @app.get("/health", response_model=HealthStatus)
 def health(db: Session = Depends(get_db)):
     db_ok = True
+    from sqlalchemy import text
     try:
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
     except Exception:
         db_ok = False
     return HealthStatus(status="ok" if db_ok else "degraded", model_loaded=pipeline.is_ready, db="ok" if db_ok else "unreachable")

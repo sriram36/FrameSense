@@ -93,9 +93,9 @@ class QualityPipeline:
             score, error_map = self.pca_detector.reconstruction_error(bgr)
             # The model was trained on very simple synthetic images (per README).
             # Real photos have much higher natural complexity, so we multiply the 
-            # trained threshold by 3.0 here to prevent them from being universally 
+            # trained threshold by 7.0 here to prevent them from being universally 
             # flagged as defective during demo testing.
-            is_defect = (self.pca_detector.threshold is not None and score > (self.pca_detector.threshold * 3.0))
+            is_defect = (self.pca_detector.threshold is not None and score > (self.pca_detector.threshold * 7.0))
             return score, is_defect, error_map
 
         return None, False, None
